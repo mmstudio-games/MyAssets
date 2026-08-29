@@ -1,0 +1,32 @@
+{
+  "name": "myassets",
+  "version": "0.1.2",
+  "description": "你和 AI 聊天产出的 HTML 页面，都可以在这里工程化变成游戏的位图资产 —— 确定性渲染成序列帧/九宫格切图/引擎导入",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "myassets": "bin/myassets.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "render": "node src/cli.js render",
+    "slice": "node src/cli.js slice",
+    "import": "node src/cli.js import",
+    "demo": "node src/cli.js render scenes/button && node src/cli.js slice scenes/button",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}

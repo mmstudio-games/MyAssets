@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--
+  最小实践场景：AI 写起来最简单的 UI —— 一个游戏按钮。
+  纪律（MyAssets 强制要求，AI 只需遵守这几点）：
+  1. 动画用 @keyframes / WAAPI，禁用 transition
+  2. 动画内禁用 Math.random() / 真实时间
+  3. body 背景透明（游戏资产需要透明 PNG）
+  4. 字体用系统字体即可（无外部加载，免字体就绪等待/版权问题）
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;   /* 纪律 3：透明背景出透明 PNG */
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn {
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    font-size: 34px;
+    font-weight: 700;
+    color: #7a4a00;
+    letter-spacing: 6px;
+
+    /* 九宫格友好结构：渐变 + 圆角 + 边框（内发光）+ 阴影 */
+    padding: 18px 56px;
+    border-radius: 20px;
+    border: none;
+    cursor: default;           /* 纪律：禁 hover 交互 */
+
+    background: linear-gradient(180deg, #ffe9a8 0%, #ffd25e 45%, #f5a623 100%);
+    box-shadow:
+      inset 0 3px 0 rgba(255, 255, 255, 0.75),   /* 顶部内高光 */
+      inset 0 -4px 0 rgba(160, 90, 0, 0.35),      /* 底部内阴影 */
+      0 6px 14px rgba(0, 0, 0, 0.35);             /* 外投影 */
+
+    /* 纪律 1：呼吸发光动画用 @keyframes */
+    animation: breathe 1s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%   { box-shadow:
+             inset 0 3px 0 rgba(255, 255, 255, 0.75),
+             inset 0 -4px 0 rgba(160, 90, 0, 0.35),
+             0 6px 14px rgba(0, 0, 0, 0.35),
+             0 0 0 rgba(255, 210, 94, 0); }
+    50%  { box-shadow:
+             inset 0 3px 0 rgba(255, 255, 255, 0.75),
+             inset 0 -4px 0 rgba(160, 90, 0, 0.35),
+             0 6px 14px rgba(0, 0, 0, 0.35),
+             0 0 34px rgba(255, 210, 94, 0.9); }
+    100% { box-shadow:
+             inset 0 3px 0 rgba(255, 255, 255, 0.75),
+             inset 0 -4px 0 rgba(160, 90, 0, 0.35),
+             0 6px 14px rgba(0, 0, 0, 0.35),
+             0 0 0 rgba(255, 210, 94, 0); }
+  }
+</style>
+</head>
+<body>
+  <button class="btn">开始游戏</button>
+</body>
+</html>

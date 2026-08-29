@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!-- 验证"零配置工作流"：用户只管写好动画（2.5s），采样参数交给 MyAssets -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; width: 100%; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+  .orb {
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, #7c4dff 0%, #4a148c 100%);
+    box-shadow: 0 0 30px rgba(124, 77, 255, 0.8);
+    animation: pulse 2.5s ease-in-out infinite;   /* 2.5 秒循环动画 */
+  }
+  @keyframes pulse {
+    0%   { transform: scale(0.8); filter: brightness(0.7); }
+    50%  { transform: scale(1.15); filter: brightness(1.4); }
+    100% { transform: scale(0.8); filter: brightness(0.7); }
+  }
+</style>
+</head>
+<body>
+  <div class="orb"></div>
+</body>
+</html>

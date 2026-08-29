@@ -1,0 +1,8 @@
+# 程序化贴图：技能光晕底 + 按钮按下遮罩（多元素 target 切图）
+name: vfx-masks
+width: 800
+height: 256
+dpr: 1
+frames: 1
+slices:
+  target: .press-mask

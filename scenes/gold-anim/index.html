@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!-- 抽卡金光动画（skill templates.md 模板验证） -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; width: 100%; height: 100%; }
+  body { position: relative; width: 430px; height: 932px; overflow: hidden; }
+  .sweep {
+    position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(100deg, transparent 0%, rgba(255,220,120,.9) 45%, rgba(255,255,255,.95) 50%, rgba(255,220,120,.9) 55%, transparent 100%);
+    filter: blur(2px);
+    animation: sweep 1.2s ease-in-out infinite;
+  }
+  .flash {
+    position: absolute; top: 50%; left: 50%; width: 60px; height: 60px; transform: translate(-50%,-50%);
+    background: radial-gradient(circle, #fff 0%, rgba(255,220,120,.8) 40%, transparent 70%);
+    animation: flash 1.2s ease-in-out infinite;
+  }
+  @keyframes sweep { 0%,100% { left: -100%; } 50% { left: 100%; } }
+  @keyframes flash { 0%,100% { opacity: 0; transform: translate(-50%,-50%) scale(.6); } 50% { opacity: 1; transform: translate(-50%,-50%) scale(1.6); } }
+</style>
+</head>
+<body>
+  <div class="sweep"></div>
+  <div class="flash"></div>
+</body>
+</html>

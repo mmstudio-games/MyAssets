@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!-- 边界场景 B：直角（无圆角）按钮 → 测试 minBorder 退化路径 -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; width: 100%; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+  .btn {
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(180deg, #7cffb2 0%, #00c853 100%);
+    border-radius: 0;   /* 直角 */
+    border: 3px solid #006b2f;
+    padding: 16px 40px;
+    color: #003311;
+    font-size: 26px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+  <button class="btn">确认</button>
+</body>
+</html>

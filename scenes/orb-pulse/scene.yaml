@@ -1,0 +1,6 @@
+# 用户只写动画（2.5s），这里只设采样参数，其他全自动
+name: orb-pulse
+width: 512
+height: 512
+dpr: 2
+fps: 30

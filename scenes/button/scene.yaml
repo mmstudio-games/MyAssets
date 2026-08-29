@@ -1,0 +1,11 @@
+# 可选配置（AI 不写也能零配置渲染，此文件仅作覆盖示例）
+# 尺寸 / 密度 / 帧率 / 帧数
+name: button
+width: 430
+height: 932
+dpr: 2
+fps: 12
+# frames: 24          # 默认按动画时长自动覆盖完整周期
+# 九宫格声明（slice 子命令使用；缺省则自动检测边框）
+slices:
+  target: .btn

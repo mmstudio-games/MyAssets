@@ -1,0 +1,8 @@
+# 程序化贴图：血条渐变底（九宫格可拉伸）
+name: bar-track
+width: 400
+height: 64
+dpr: 1
+frames: 1
+slices:
+  target: .bar

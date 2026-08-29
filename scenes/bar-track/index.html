@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- 程序化贴图：血条/进度条渐变底（九宫格可拉伸）
+     纯线性渐变 + 高光带，AI 一行 CSS 出贴图 -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; width: 100%; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+
+  .bar {
+    width: 400px;
+    height: 64px;
+    /* 血条底：深色渐变 + 内高光 + 内阴影，引擎上用九宫格拉伸 */
+    background: linear-gradient(180deg,
+      #3a2a1a 0%,
+      #1a0e05 40%,
+      #0d0502 100%);
+    border-radius: 32px;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.35),
+      inset 0 -3px 0 rgba(0, 0, 0, 0.6),
+      inset 0 0 12px rgba(255, 120, 0, 0.25);
+  }
+</style>
+</head>
+<body>
+  <div class="bar"></div>
+</body>
+</html>

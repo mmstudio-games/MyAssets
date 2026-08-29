@@ -1,0 +1,3 @@
+name: btn-custom-hook
+slices:
+  target: .btn

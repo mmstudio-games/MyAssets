@@ -1,0 +1,6 @@
+# 程序化贴图：稀有度光晕（方形 512，1 帧静态）
+name: glow-rare
+width: 512
+height: 512
+dpr: 1
+frames: 1

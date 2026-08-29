@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!-- L1 钩子测试：场景内定义 window.__MYASSETS_DETECT__ 自定义九宫格算法
+     用户（或 AI）在 HTML 里实现约定函数名，MyAssets 检测到就调用，替代内置算法。
+     约定签名：__MYASSETS_DETECT__(imageData, {width, height}) => {left,top,right,bottom} -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; width: 100%; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+  .btn {
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(180deg, #b39ddb 0%, #673ab7 100%);
+    border-radius: 12px;
+    padding: 20px 56px;
+    color: #fff;
+    font-size: 30px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+  <button class="btn">自定义切法</button>
+  <script>
+    // MyAssets 钩子：用户自定义九宫格算法（此处演示"固定边框 24"）
+    window.__MYASSETS_DETECT__ = function (imageData, ctx) {
+      // 纯函数约定：可读 imageData.data 像素，返回边框数字
+      // 演示：直接返回固定值（真实场景可做自定义检测逻辑）
+      return { left: 24, top: 24, right: 24, bottom: 24 };
+    };
+  </script>
+</body>
+</html>

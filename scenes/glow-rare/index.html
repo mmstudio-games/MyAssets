@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- 程序化贴图：卡片稀有度光晕（卡牌游戏常见资产）
+     AI 只需写一个 div + CSS 渐变/滤镜，MyAssets 确定性出透明 PNG 贴图 -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: transparent; width: 100%; height: 100%; }
+  body { display: flex; align-items: center; justify-content: center; }
+
+  .glow {
+    width: 512px;
+    height: 512px;
+    /* 稀有度光晕：径向渐变 + 柔光，透明边缘 */
+    background: radial-gradient(circle,
+      rgba(255, 215, 100, 0.95) 0%,
+      rgba(255, 180, 60, 0.55) 30%,
+      rgba(255, 140, 40, 0.22) 55%,
+      rgba(255, 120, 30, 0.06) 78%,
+      transparent 100%);
+    border-radius: 50%;
+    /* 辉光：模糊扩散（CSS filter 确定性地出辉光贴图） */
+    filter: blur(2px);
+  }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+</body>
+</html>

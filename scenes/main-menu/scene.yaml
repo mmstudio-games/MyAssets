@@ -1,0 +1,16 @@
+# 主菜单界面：多资产编排导出（export 命令演示）
+name: main-menu
+width: 720
+height: 640
+dpr: 1
+frames: 1
+assets:
+  - name: start-btn        # 九宫格按钮
+    selector: .start-btn
+    nine: true
+  - name: title-glow       # 整图贴图（光晕）
+    selector: .title-glow
+    nine: false
+  - name: deco-bar         # 九宫格装饰条（可拉伸）
+    selector: .deco-bar
+    nine: true

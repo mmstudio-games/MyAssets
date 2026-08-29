@@ -1,0 +1,4 @@
+# 多按钮场景：指定只切 .btn-a（若去掉 target，默认全图检测会取到整页 bbox）
+name: multi
+slices:
+  target: .btn-a

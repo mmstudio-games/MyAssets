@@ -1,0 +1,7 @@
+# 覆盖示例：无动画静态场景，自定义小尺寸
+name: panel-static
+width: 320
+height: 200
+dpr: 1
+fps: 10
+frames: 3
