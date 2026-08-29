@@ -9,6 +9,7 @@
 
 export { renderScene } from './render.js';
 export { renderVideo } from './video.js';
+export { goldenRun } from './golden.js';
 export { detectNineSlice, sliceNineGrid, locateTarget } from './slice.js';
 export { exportScene } from './export.js';
 export { exportImportDir } from './import.js';

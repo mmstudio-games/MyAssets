@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderScene } from './render.js';
+import { goldenRun } from './golden.js';
 import { loadSceneConfig } from './config.js';
 import { sliceNineGrid, locateTarget } from './slice.js';
 import { exportImportDir } from './import.js';
@@ -30,6 +31,7 @@ function usage() {
   myassets pack   <场景|PNG>... [--name 图集名] [--maxw 2048]
   myassets video  <scene> [--out FILE] [--fps N] [--duration MS]
   myassets export <scene> [--out DIR]
+  myassets golden <scene> [--update] [--tolerance N]
 
 场景: 目录（内含 index.html / scene.html）或单个 .html 文件
 
@@ -73,6 +75,11 @@ export 选项:
   --out DIR     输出目录（默认 build/<场景名>/export）
   --channel NAME / --executable-path PATH  浏览器选择（默认同 render）
 
+golden 选项:
+  --update      刷新基线 build/golden/<场景名>/（默认是 check：渲染并与基线逐像素对比）
+  --tolerance N 单通道容差（默认 0 = 严格一致；换内核调试时可放宽）
+  --channel NAME / --executable-path PATH  浏览器选择（默认同 render）
+
 示例:
   myassets render scenes/button          # 渲染按钮场景 → 序列帧
   myassets slice scenes/button           # 第 0 帧 → 九宫格切片
@@ -80,6 +87,7 @@ export 选项:
   myassets pack scenes/button            # 12 帧 → 精灵图 sprite sheet
   myassets pack scenes/button scenes/glow-rare   # 多资产 → 图集 atlas
   myassets video scenes/button           # 动画 → 透明 WebM
+  myassets golden scenes/button          # 视觉回归：渲染并与基线逐像素对比
 
 配置优先级: CLI 参数 > scene.yaml > 默认值
 yaml 对应（与 CLI 对齐）:
@@ -130,6 +138,20 @@ export function resolveScene(sceneArg) {
   return { htmlPath, sceneDir, name, config };
 }
 
+/** clip：CLI "--clip x,y,w,h" > yaml "clip: [x,y,w,h]" > 无 */
+function resolveClip(args, config) {
+  if (args.clip) {
+    const [x, y, w, h] = args.clip.split(',').map(Number);
+    if (![x, y, w, h].every(Number.isFinite)) throw new Error(`--clip 需为 "x,y,w,h" 四个数字`);
+    return { x, y, w, h };
+  }
+  if (Array.isArray(config.clip) && config.clip.length === 4) {
+    const [x, y, w, h] = config.clip.map(Number);
+    return { x, y, w, h };
+  }
+  return null;
+}
+
 async function cmdRender(args) {
   if (args._.length < 1) return usage();
   const { htmlPath, name, config } = resolveScene(args._[0]);
@@ -137,18 +159,7 @@ async function cmdRender(args) {
     args.out ?? path.join(__dirname, '..', 'build', name, 'frames'));
 
   // clip：CLI "--clip x,y,w,h" > yaml "clip: [x,y,w,h]" > 无
-  const clip = (() => {
-    let v = null;
-    if (args.clip) {
-      const [x, y, w, h] = args.clip.split(',').map(Number);
-      if (![x, y, w, h].every(Number.isFinite)) throw new Error(`--clip 需为 "x,y,w,h" 四个数字`);
-      v = { x, y, w, h };
-    } else if (Array.isArray(config.clip) && config.clip.length === 4) {
-      const [x, y, w, h] = config.clip.map(Number);
-      v = { x, y, w, h };
-    }
-    return v;
-  })();
+  const clip = resolveClip(args, config);
 
   const browserOpts = resolveBrowserArgs(args);
   const result = await renderScene({
@@ -355,6 +366,67 @@ async function cmdExport(args) {
   console.log(`  manifest.json`);
 }
 
+/** golden：视觉回归（渲染并与入库基线逐像素对比；--update 刷新基线） */
+async function cmdGolden(args) {
+  if (args._.length < 1) return usage();
+  const { htmlPath, name, config } = resolveScene(args._[0]);
+  const framesOutDir = path.resolve(path.join(__dirname, '..', 'build', name, 'frames'));
+  const goldenDir = path.resolve(path.join(__dirname, '..', 'build', 'golden', name));
+  const diffOutDir = path.resolve(path.join(__dirname, '..', 'build', 'golden-diff', name));
+  const update = !!args.update;
+  const tolerance = args.tolerance !== undefined ? Number(args.tolerance) : 0;
+  const browserOpts = resolveBrowserArgs(args);
+
+  const report = await goldenRun({
+    htmlPath,
+    framesOutDir,
+    goldenDir,
+    diffOutDir,
+    update,
+    tolerance,
+    renderOpts: {
+      width: args.width ? Number(args.width) : config.width,
+      height: args.height ? Number(args.height) : config.height,
+      dpr: args.dpr ? Number(args.dpr) : config.dpr,
+      fps: args.fps ? Number(args.fps) : config.fps,
+      frames: args.frames ? Number(args.frames) : config.frames,
+      clip: resolveClip(args, config),
+      channel: browserOpts.channel,
+      executablePath: browserOpts.executablePath,
+    },
+  });
+
+  const p = report.params;
+  const paramsStr = `width=${p.width} height=${p.height} dpr=${p.dpr} fps=${p.fps} frames=${p.frames}`;
+  if (report.mode === 'update') {
+    console.log(`✔ 基线已更新: ${report.goldenDir}（${report.frames} 帧 + manifest.json）`);
+    console.log(`  参数 ${paramsStr}`);
+    return;
+  }
+
+  if (report.passed) {
+    console.log(`✔ golden 检查通过: scenes/${report.scene}（${report.frames.length} 帧一致）`);
+    console.log(`  参数 ${paramsStr}`);
+    return;
+  }
+
+  console.error(`✘ golden 检查失败: scenes/${report.scene}`);
+  for (const f of report.frames) {
+    if (f.status === 'diff') {
+      console.error(`  ${f.name}  差异 ${f.diffPixels}px (${(f.diffRatio * 100).toFixed(3)}%)  bbox ${f.box.x},${f.box.y} ${f.box.w}×${f.box.h}`);
+      if (f.diffFile) console.error(`     差异图 → ${f.diffFile}`);
+    } else if (f.status === 'size-mismatch') {
+      console.error(`  ${f.name}  尺寸不一致`);
+    } else if (f.status === 'removed') {
+      console.error(`  ${f.name}  基线有、当前缺失（帧数减少）`);
+    } else if (f.status === 'added') {
+      console.error(`  ${f.name}  当前新增帧（帧数增加）`);
+    }
+  }
+  console.error(`  有意变更？运行 myassets golden scenes/${report.scene} --update 刷新基线`);
+  process.exitCode = 1;
+}
+
 /** CLI 入口（bin/myassets.js 与直接 node src/cli.js 共用） */
 export async function run(argv = process.argv.slice(2)) {
   const cmd = argv[0];
@@ -378,6 +450,9 @@ export async function run(argv = process.argv.slice(2)) {
         break;
       case 'export':
         await cmdExport(args);
+        break;
+      case 'golden':
+        await cmdGolden(args);
         break;
       default:
         usage();

@@ -15,6 +15,6 @@
 
 ## Node 与浏览器（实测）
 
-- Node v24.19.0 可用；PowerShell 禁 `.ps1` 脚本 → 用 `npm.cmd` / `npx.cmd` / `my-assets.cmd`。
-- 系统已装 Chrome（`C:\Program Files\Google\Chrome\Application\chrome.exe`），Playwright `channel: 'chrome'` 立即可用；`npx playwright install chromium` 走 CDN 下载较慢（约 160MB，实测 ~1MB/min，可后台挂着）。
+- Node v24.19.0 可用；PowerShell 禁 `.ps1` 脚本 → 用 `npm.cmd` / `npx.cmd` / `myassets.cmd`。
+- 内置内核已装：`npx playwright install chromium` 成功（缓存在 `%LOCALAPPDATA%\ms-playwright`），默认 `channel: 'chromium'` 可用；系统 Chrome（`channel: 'chrome'`）也是可用替代。
 - 模型不支持读图（deepseek-v4-flash 无 image input）→ 视觉验证一律用**程序化断言**（canvas 解码 + 像素统计），这也正是产品三层验证架构里的确定性层。

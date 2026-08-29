@@ -37,16 +37,15 @@ await Promise.all([iframeReady, canvasCommit]); // 独立通道
 - 解法：**组件化/设计系统**（改局部不波及其他）、**视觉回归自动化**（改后自动截图 diff）、**重生成优于修补**（布局级改动让 AI 重写场景，首版质量最高）、**参数化**（间距/颜色/字号外置成 theme 变量）。
 - **对本品是顺风**：游戏素材是一次性资产，重新生成成本远低于修旧布局，天然绕开迭代难题。
 
-## 5. 三层验证架构（AI 能否验证自己写的网页）
+## 5. 验证架构（AI 能否验证自己写的网页）
 
 | 层次 | 可靠性 | 说明 |
 |---|---|---|
 | 程序化断言 | ⭐⭐⭐⭐⭐ 确定性 | AI 写断言脚本：元素不重叠/不溢出/尺寸对/字体就绪 |
 | Golden-image diff | ⭐⭐⭐⭐⭐ 确定性 | 基线 vs 当前逐像素对比（视觉回归测试，行业标准） |
-| AI 视觉评审 | ⭐⭐⭐ 主观层 | 多模态模型看图评风格/布局合理性（明显问题可靠，像素级不可靠） |
 
-结论：最强的质量验证（断言 + diff）不依赖 AI 看图；AI 看图只做主观层评审。**产品应把验证做成确定性管道，不靠 AI 自觉。**
-当前状态：程序化断言已实现（test/ 全链路）；golden-image diff 与 AI 评审在 roadmap。
+结论：验证应做成确定性管道（断言 + diff），不靠 AI 看图。
+当前状态：程序化断言已实现（test/ 全链路）；golden-image diff 已实现（`myassets golden`）。
 
 ## 6. 市场空白与差异化
 
@@ -65,14 +64,6 @@ await Promise.all([iframeReady, canvasCommit]); // 独立通道
 | `browser render game assets` | 6 个，全不相关 |
 
 → **"HTML/CSS 渲染 → 游戏引擎资产"细分确认空白。**
-
-### AI 视觉验证闭环（行业方向实证）
-
-- `hixuanxuan/browser-automation` [★12]：AI agent 质量验证技能集（visual diff + DOM assertions + screenshot）→ 印证三层验证架构
-- `dstekanov/playwright-ai-observer` [★1]：GPT-4 Vision 看图检测 UI 回归 → 印证 AI 视觉评审层
-- `CheungKingwei/ui-review-inspector` [★1]：设计稿 vs 实现截图对比 + OCR + AI 分析
-
-→ 验证闭环是行业共识方向，但全部是通用 web 场景，**无一人接游戏资产管线**。
 
 ### 差异化表（参照产品不做、我们必须做的）
 
@@ -110,19 +101,18 @@ CLI：myassets（产品名 MyAssets，仓库目录 myassets/）
 └─ import                 # → Cocos Creator / Unity 资源目录（.plist/.meta/图集）
 ```
 
-验证闭环（三层）：
+验证闭环（两层）：
 
 ```
 AI 写 HTML → 渲染出图
   → ① 程序化断言（无重叠/无溢出/尺寸对）     确定性
   → ② 像素 diff（vs 基线/目标）              确定性
-  → ③ AI 视觉评审（风格/违和感）             主观层
   → 反馈给 AI → 重生成或局部修 → 再验证
 ```
 
-落地顺序：原型验证最痛点（一个 HTML 场景含动画 → 确定性逐帧渲染 → PNG 序列帧 → 九宫格自动切图 → 输出 Cocos 可导入目录，跑通全链路）→ scene.yaml 配置化 + 程序化断言 → golden-image diff + AI 评审闭环 → 再评估 Cocos/Unity 导入器插件与引擎侧运行时组件。
+落地顺序：原型验证最痛点（一个 HTML 场景含动画 → 确定性逐帧渲染 → PNG 序列帧 → 九宫格自动切图 → 输出 Cocos 可导入目录，跑通全链路）→ scene.yaml 配置化 + 程序化断言 → golden-image diff → 再评估 Cocos/Unity 导入器插件与引擎侧运行时组件。
 
 - [ ] 真实场景验收：AI 生成"抽卡金光动画"HTML → 全链路出资产 → 引擎导入验证
-- [ ] 验证闭环：golden-image diff + AI 视觉评审
+- [x] 验证闭环：golden-image diff（myassets golden）
 - [ ] 纹理压缩（ASTC/ETC/KTX2）
 - [ ] 无缝循环检测、静态层+动画层分层导出

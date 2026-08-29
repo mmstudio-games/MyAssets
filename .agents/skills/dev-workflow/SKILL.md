@@ -48,6 +48,7 @@ npm run demo      # 端到端：render + slice
 
 - 确定性相关改动：额外做"两次渲染逐字节一致"验证
 - 浏览器相关改动：验证默认 chromium 通道可用
+- 视觉相关改动：`myassets golden <scene>` 回归（基线缓存在 build/golden/，首次或参数变化后先 `--update`）
 
 ### ⑥ 更新文档
 
@@ -61,6 +62,7 @@ npm run demo      # 端到端：render + slice
 
 - [ ] `npm test` 全绿
 - [ ] 语法检查通过（`node --check`）
+- [ ] 视觉相关改动通过 `myassets golden <scene>` 回归
 - [ ] 用户文档/开发者文档已同步
 - [ ] CHANGELOG 已更新（如行为变化）
 - [ ] 版本号已按版本纪律递增（如本次是代码/契约/skill 变更）

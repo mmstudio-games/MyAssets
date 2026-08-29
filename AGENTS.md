@@ -14,7 +14,7 @@ npm install                          # 安装依赖
 npx playwright install chromium      # 首次安装内置渲染内核（版本锁定）
 npm run demo                         # 一键：render + slice button 场景
 npm test                             # node:test 全套回归（必须全绿再交付）
-myassets render/slice/import/pack <scene>  # CLI 四命令（bin/myassets.js 入口）
+myassets render/slice/import/pack/video/export/golden <scene>  # CLI 七命令（bin/myassets.js 入口）
 ```
 
 ## 项目结构
@@ -33,9 +33,9 @@ src/
   config.js          scene.yaml 解析（含对象列表）
   browser.js         浏览器内核选择（channel / executablePath）
 engine-libs/        引擎帧装配器（Godot/Cocos/UE5 单文件脚本，调原生 API 装配帧资产）
-test/*.test.js       node:test 测试（8 个文件 / 14 个用例：render / slices / stretch / target / textures / pack / custom-borders / export / video）
+test/*.test.js       node:test 测试（10 个文件 / 19 个用例：render / slices / stretch / target / textures / pack / custom-borders / export / video / golden）
 scenes/              示例场景（按钮/面板/九宫格 + 程序化贴图：光晕/血条/遮罩）
-build/               产物（gitignore，不入库）
+build/               产物（gitignore，不入库；含 build/golden/ 视觉回归基线与 golden-diff/ 差异图）
 ```
 
 ## 核心纪律（改动代码时必须遵守）
@@ -49,7 +49,7 @@ build/               产物（gitignore，不入库）
 
 ## 版本纪律（全项目唯一版本号）
 
-- **全项目只存在一个版本号**：`package.json` 的 `version` 是唯一权威来源（当前 `0.1.2`，纯 semver 不带 `v`）；对外显示统一带 `v` 前缀（`v0.1.2`）。`package-lock.json`、CHANGELOG、README 等处的版本必须与之一致，**不得另设其他版本号**。
+- **全项目只存在一个版本号**：`package.json` 的 `version` 是唯一权威来源（当前 `0.1.3`，纯 semver 不带 `v`）；对外显示统一带 `v` 前缀（`v0.1.3`）。`package-lock.json`、CHANGELOG、README 等处的版本必须与之一致，**不得另设其他版本号**。
 - **代码 / 契约（API、scene.yaml 约定、engine-libs 脚本）/ skill 的任何变动都递增版本号**，按变更类别决定递增位置：
   - **人为定档**（人为发布定版）→ 主版本 +1（如 `0.1.1` → `1.0.0`）
   - **新增工程规划**（立项 / 新能力规划）→ 次版本 +1（如 `0.1.1` → `0.2.0`）
@@ -71,6 +71,7 @@ build/               产物（gitignore，不入库）
 - **边框来源可插拔**：`slice.js` 的 `detectNineSlice` 支持 `border`（手动）/ `hookHtmlPath`（HTML 钩子 `window.__MYASSETS_DETECT__`）/ 内置自动三档；钩子必须纯函数（只读像素数据返回数字），失败自动回退内置。
 - **page.evaluate 闭包陷阱**：浏览器上下文里不能用 Node 的 `fs`/`path`——文件读取必须在 evaluate 外完成，只传数据进去。
 - **PowerShell 执行策略**：本机 `npm.ps1` 被禁，用 `npm.cmd` / `myassets.cmd`。
+- **golden 参数不匹配会拒对比**：渲染参数（含 scene.yaml）变化后需 `myassets golden <scene> --update` 刷新基线，否则报错提示——避免拿不同参数的产物误判差异。
 - **输出中文乱码**：PowerShell 控制台 GBK 解码 UTF-8 是显示问题，文件本身是好的——用 Node 读文件验证，不要信控制台。
 
 ## 完成标准

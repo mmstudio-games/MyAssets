@@ -1,6 +1,6 @@
 ---
 name: myassets
-description: 面向游戏开发者的 MyAssets 资产生成工作流。当用户想把 HTML/CSS 页面（含 AI 生成的）变成游戏引擎可用的位图资产（PNG 序列帧 / 九宫格切图 / 精灵图 / 透明 WebM / 引擎导入目录）时使用。指导 AI 写出符合 MyAssets 纪律的场景 HTML，并正确调用 myassets CLI 完成 render / slice / pack / video / export / import 全流程。
+description: 面向游戏开发者的 MyAssets 资产生成工作流。当用户想把 HTML/CSS 页面（含 AI 生成的）变成游戏引擎可用的位图资产（PNG 序列帧 / 九宫格切图 / 精灵图 / 透明 WebM / 引擎导入目录）时使用。指导 AI 写出符合 MyAssets 纪律的场景 HTML，并正确调用 myassets CLI 完成 render / slice / pack / video / export / import / golden 全流程。
 whenToUse: 用户提到"游戏资产""序列帧""九宫格""精灵图""贴图""按钮素材""UI 素材""抽卡动画""透明视频""接入 Cocos/Godot/UE5"，或要求把 HTML/CSS 变成游戏引擎可用的位图资产时。
 ---
 
@@ -20,6 +20,7 @@ whenToUse: 用户提到"游戏资产""序列帧""九宫格""精灵图""贴图""�
 | `myassets video <scene>` | 透明视频 | WebM（VP9 + alpha） |
 | `myassets export <scene>` | 多资产编排 | 一个界面整套资产 + manifest |
 | `myassets import <scene>` | 引擎导入 | Cocos .meta / Unity meta |
+| `myassets golden <scene>` | 视觉回归 | 渲染 vs 基线逐像素对比（`--update` 刷新基线） |
 
 **核心价值**：
 - **确定性**：同输入必同输出（两次渲染逐字节一致）——AI 反复调整也不怕资产漂移
@@ -119,6 +120,7 @@ myassets video scenes/button      # 透明 WebM（UI 动效用）
 myassets pack scenes/button scenes/gold-anim   # 多场景打包成图集
 myassets export scenes/main-menu  # 一个界面整套资产（scene.yaml 配 assets）
 myassets import scenes/button     # 引擎导入目录
+myassets golden scenes/button     # 视觉回归：与基线逐像素对比（首次/有意变更后加 --update）
 ```
 
 ### 步骤 4：接入引擎
@@ -142,7 +144,7 @@ myassets import scenes/button     # 引擎导入目录
 
 ## 关键注意事项（避免踩坑）
 
-1. **先 render 再 slice/export**：slice 读 build/<scene>/frames/f000.png，没渲染会报错
+1. **先 render 再 slice/export**：slice 读 build/<scene>/frames/f000.png，没渲染会报错；golden 首次运行需 `--update` 生成基线（缓存在 build/golden/，不入库）
 2. **fps 一致性**：引擎播放器 fps 必须 = render 的 fps（默认 12），否则播放速度不对
 3. **半透明资产的九宫格边框**：遮罩/光晕等半透明元素，边框检测会退化为最小边框（预期行为，可手动 `slices.border` 指定）
 4. **包体**：24 帧全屏 430×932@2x PNG ≈ 70MB+，长动画用 video WebM 或图集
@@ -155,6 +157,7 @@ myassets import scenes/button     # 引擎导入目录
 - slice 成功：`build/<scene>/slices/` 有 9 张 slice-*.png + ninegrid.json
 - video 成功：`build/<scene>/<scene>.webm` 且提示透明 VP9
 - export 成功：`build/<scene>/export/manifest.json` 列出所有资产
+- golden 通过：`build/golden/<scene>/` 有基线（--update 生成），check 输出 ✔ 且退出码 0；有差异时逐帧报像素数/区域并写 `build/golden-diff/<scene>/diff-*.png`
 
 ## 安装到你的 AI 工具（接入工作流）
 

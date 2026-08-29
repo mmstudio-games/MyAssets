@@ -12,17 +12,20 @@
 └─────────────┘   └──────────────────┘   └──────────────────┘   └───────────────┘
 ```
 
-三个命令串成流水线：`render` 出帧 → `slice` 拿第 0 帧切九宫格 → `import` 打包成引擎格式。
+七条 CLI 命令：`render` 出帧 → `slice` 拿第 0 帧切九宫格 → `import` 打包成引擎格式是基础流水线（如上图）；`pack`（图集打包）、`video`（透明 WebM）、`export`（多资产编排）、`golden`（视觉回归）为独立命令。
 
 ## 模块职责（src/）
 
 | 模块 | 职责 | 关键导出 |
 |---|---|---|
-| `cli.js` | CLI 参数解析、三个命令编排、场景解析 | `run()` / `resolveScene()` |
+| `cli.js` | CLI 参数解析、七命令编排、场景解析 | `run()` / `resolveScene()` |
 | `render.js` | 确定性逐帧渲染（核心地基） | `renderScene()` |
+| `golden.js` | 视觉回归：渲染产物 vs 基线逐像素对比（check/update） | `goldenRun()` / `pixelDiffMany()` |
 | `slice.js` | 九宫格边框自动检测 + 3×3 切片 | `detectNineSlice()` / `sliceNineGrid()` / `locateTarget()` |
 | `pack.js` | 图集打包（贪心 shelf + trim + plist） | `buildAtlas()` / `packRects()` / `buildPlist()` |
+| `video.js` | 透明 WebM 导出（双页面：场景页截图 → 录制页 MediaRecorder） | `renderVideo()` |
 | `import.js` | 引擎导入目录生成 | `exportImportDir()` |
+| `export.js` | 多资产编排导出（scene.yaml assets） | `exportScene()` |
 | `config.js` | scene.yaml 解析（极简 YAML 子集） | `loadSceneConfig()` / `parseYaml()` |
 | `browser.js` | 浏览器内核三档选择 + 路径预检 | `resolveLaunchOptions()` / `resolveBrowserArgs()` |
 | `index.js` | 库入口，导出全部 API | — |
@@ -67,6 +70,15 @@ for (let i = 0; i < 24; i++) {
 ```
 
 **确定性验证**：同输入两次渲染 12 帧逐字节一致（MD5 全同）；静态场景帧间零抖动。
+
+## 视觉回归（golden.js）
+
+双模式（`myassets golden <scene>`）：
+
+- **check（默认）**：`renderScene` 渲染 → 与 `build/golden/<场景>/frames/` 基线逐帧对比。帧字节相同直接通过；不同则浏览器 canvas 逐像素 diff（任一 RGBA 通道差 > tolerance 计为差异像素），输出差异统计（像素数 / 差异率 / 差异框）+ 差异叠加图（`build/golden-diff/<场景>/diff-*.png`，差异像素标红）。
+- **update（`--update`）**：渲染 → 拷贝为基线 + 写 manifest.json（渲染参数快照），基线缓存于 `build/golden/<场景>/`（gitignore 不入库——帧是确定性渲染的派生产物，可随时重建）。
+
+护栏：基线 manifest 记录 width/height/dpr/fps/frames/clip，check 时参数不一致直接报错提示 `--update`，避免拿不同参数的产物误判。默认 `tolerance=0`（版本锁定内核 + 确定性纪律保证逐像素一致）；换内核调试可用 `--tolerance` 容差。video 不做基线（VBR 字节级不确定）；派生资产由帧推导，锁帧即锁全部。
 
 ## 九宫格检测算法（slice.js）—— 三层结构
 
@@ -125,6 +137,14 @@ ninegrid.json 记录 `borderSource`（manual / html-hook / auto）供追溯。
 ## 引擎导入（import.js）
 
 输出：单图（Cocos/Unity Sliced 模式）+ 引擎无关参数 JSON + Cocos `.png.meta`（borderTop/Bottom/Left/Right）+ Unity `.unitymeta`（spriteBorder）+ 各引擎 README。
+
+## 透明视频（video.js）
+
+双页面架构：场景页驱动动画 + CDP 截图（与 render 同时间轴 / 双 rAF / 截图通道，帧内容一致）→ 录制页 canvas `captureStream` + `MediaRecorder`（`--enable-features=CanvasCaptureStreamTransparent` 保留 VP9 alpha）。**先测速再定帧数**：headless 截图有速率上限（约 40-100ms/帧），请求 fps 超过可达值时自动降级（时长保持正确）。视频编码 VBR，字节级不确定（行业常态）。
+
+## 多资产编排（export.js）
+
+scene.yaml `assets` 声明资产列表（`name` / `selector` / `nine`），export 一次导出整套：九宫格资产 → `locateTarget` 定位 + `detectNineSlice` 切片 + ninegrid.json；整图贴图 → 定位 + 元素区域内内容裁剪（alpha ≥ 32 收紧）单 PNG；最后汇总 manifest.json。
 
 ## 浏览器内核选择（browser.js）
 

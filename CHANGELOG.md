@@ -2,8 +2,16 @@
 
 本文件记录 MyAssets 的行为变化。格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-> **唯一版本号：v0.1.2**（权威来源：`package.json` 的 `version`，纯 semver 不带 `v`；对外显示带 `v` 前缀）。
+> **唯一版本号：v0.1.3**（权威来源：`package.json` 的 `version`，纯 semver 不带 `v`；对外显示带 `v` 前缀）。
 > 代码 / 契约 / skill 的任何变动都递增它：人为定档 → 主 +1；新增工程规划 → 次 +1；落地 / 修 bug → 末 +1。规则见 [AGENTS.md](AGENTS.md)。
+
+## [v0.1.3] - 2026-08-29
+
+### 新增
+- **golden-image diff 视觉回归**（golden）：`myassets golden <scene>` 渲染并与基线逐像素对比（默认 tolerance=0 严格一致），`--update` 刷新基线
+- 基线缓存于 `build/golden/<场景>/`（帧 + manifest.json 渲染参数快照，gitignore 不入库——帧是确定性渲染的派生产物，可随时 `--update` 重建）；参数不一致时 check 报错提示先 `--update`，避免拿不同参数的产物误判
+- 差异报告：逐帧输出差异像素数 / 差异率 / 差异区域，差异叠加图（差异标红）写入 `build/golden-diff/<场景>/diff-*.png`；有差异退出码 1（可挂 CI）
+- golden.test.js（5 个用例：参数一致性 / 帧清单差异 / 像素 diff 单像素检测 + 差异框 / tolerance 容差 / 尺寸不一致）
 
 ## [v0.1.2] - 2026-08-29
 
@@ -21,7 +29,7 @@
 - 引擎导入目录（import）：Cocos / Unity meta + 参数 + 说明
 - 多元素 target 切图定位
 - 浏览器内核三档选择（内置 Chromium / 系统浏览器 / 手动指定路径）
-- node:test 测试体系（5 个测试文件 / 6 个用例）
+- node:test 测试体系（9 个测试文件 / 14 个用例）
 - **程序化贴图**：渐变/光晕/辉光/遮罩贴图场景 + 验证（稀有度光晕、血条底、技能光晕、按下遮罩）
 - **图集打包**（pack）：序列帧精灵图 / 多资产图集，自动裁透明边（trim），输出坐标 JSON + Cocos `.plist`
 - **自定义九宫格边框**：三档来源（--border 手动 / HTML 内嵌钩子 `__MYASSETS_DETECT__` / 内置自动检测），钩子失败自动回退

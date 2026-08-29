@@ -6,7 +6,7 @@
 
 > 设计理念：AI 不擅长写引擎 shader/粒子参数，但极其擅长写 HTML/CSS。MyAssets 把"HTML 场景"变成"引擎资产"，并内置确定性纪律（同输入必同输出），让资产管线可依赖、可验证。
 >
-> 当前版本：**v0.1.2**（全项目唯一版本号，权威来源 `package.json`；代码/契约/skill 任何变动均按 主/次/末 递增，规则见 [AGENTS.md](AGENTS.md)，历史见 [CHANGELOG.md](CHANGELOG.md)）
+> 当前版本：**v0.1.3**（全项目唯一版本号，权威来源 `package.json`；代码/契约/skill 任何变动均按 主/次/末 递增，规则见 [AGENTS.md](AGENTS.md)，历史见 [CHANGELOG.md](CHANGELOG.md)）
 
 ## 快速开始
 
@@ -26,9 +26,12 @@ myassets import scenes/button    # 3. → 引擎可导入目录（Cocos .meta / 
 
 - **一个 .html 就是一个场景**：AI 只写自包含 HTML（内联 CSS、keyframes 动画、透明背景），零配置出图
 - **确定性渲染**：同输入必同输出（两次渲染逐字节一致），资产管线可依赖
+- **视觉回归**：golden-image diff——渲染产物与基线逐像素对比，防无声漂移（`myassets golden <scene>`）
 - **九宫格自动切图**：自动测边框（渐变/圆角/文字/投影/直角全覆盖），多元素 `slices.target` 定位
 - **程序化贴图**：渐变/光晕/辉光/遮罩等贴图，CSS 一行即出透明 PNG（稀有度光晕、血条底、技能光晕、按下遮罩等场景）
 - **图集打包**：序列帧精灵图 / 多资产图集合成一张（自动裁透明边）+ 坐标 JSON + Cocos `.plist`
+- **透明视频**：动画直出透明 WebM（VP9 + alpha，Cocos 小游戏直接播），自动测速降级保时长
+- **多资产编排**：scene.yaml 声明 assets，一个界面一次导出整套（九宫格 + 贴图 + manifest）
 - **引擎导入**：Cocos Creator 3.x / Unity / Godot 可直接使用
 - **多内核选择**：内置 Chromium（默认，版本锁定）/ 系统 Chrome/Edge / 手动指定任意 Chromium 系内核
 
@@ -46,11 +49,11 @@ myassets import scenes/button    # 3. → 引擎可导入目录（Cocos .meta / 
 - [x] 最小实践：HTML → 确定性渲染 → PNG 序列帧（两次渲染逐字节一致）
 - [x] 九宫格自动切图（渐变/圆角/文字/投影/直角全覆盖，多元素 target 定位）
 - [x] 引擎导入目录（Cocos / Unity meta + 参数 + 说明）
-- [ ] 精灵图/图集打包 + Cocos `.plist` 输出
-- [ ] golden-image diff 视觉回归
-- [ ] AI 视觉评审闭环
+- [x] 精灵图/图集打包 + Cocos `.plist` 输出
+- [x] 透明 WebM 视频导出（VP9 + alpha，自动测速降级保时长）
+- [x] 多资产编排导出（export：一个界面整套资产 + manifest）
+- [x] golden-image diff 视觉回归（myassets golden）
 - [x] 引擎帧装配器（engine-libs/：Godot/Cocos/UE5 调原生 API 一键装配帧资产）
-- [ ] 透明 WebM 视频导出
 
 ## 许可
 

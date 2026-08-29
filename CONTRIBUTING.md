@@ -10,7 +10,7 @@ cd myassets
 npm install
 npx playwright install chromium   # 安装内置渲染内核（版本锁定）
 npm run demo                      # 跑通全链路（render + slice button 场景）
-npm test                          # 4/4 全绿
+npm test                          # node:test 回归（10 文件 / 19 用例）全绿
 ```
 
 ## 提 Issue

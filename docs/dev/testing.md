@@ -1,7 +1,7 @@
 # MyAssets 测试体系
 
 > 面向**开发者/贡献者**：测试怎么组织、每个测试断言什么、怎么跑。
-> 测试策略核心：**程序化断言，不依赖 AI 看图**（对应产品三层验证架构的确定性层）。
+> 测试策略核心：**程序化断言，不依赖 AI 看图**（对应产品验证架构的确定性层）。
 
 ## 运行
 
@@ -9,7 +9,7 @@
 npm test    # node --test "test/**/*.test.js"
 ```
 
-前置条件：`npm run demo`（或手动 `myassets render scenes/button && myassets slice scenes/button`）生成 build 产物。测试读 build/ 产物做断言。
+前置条件：先用 `myassets` 跑出各测试依赖的 build/ 产物（`npm run demo` 只覆盖 button 场景；target / textures / pack / custom-borders / export / video 测试还需 render 对应场景：multi、glow-rare、bar-track、btn-custom-hook、btn-square、main-menu，video 测试需先 `myassets video scenes/button`）。测试读 build/ 产物做断言，缺失时按报错提示先跑对应命令。**例外：golden.test.js 自构造 PNG 夹具，不需要 build/ 产物**（浏览器相关用例仍需 chromium）。
 
 ## 测试文件（test/*.test.js）
 
@@ -19,6 +19,12 @@ npm test    # node --test "test/**/*.test.js"
 | `slices.test.js` | 九宫格切图 | **9 切片拼回原图逐像素一致（差异 0）**、边框自洽、角切片圆角正确 |
 | `stretch.test.js` | 引擎拉伸重建 | **四角固定区 0 变形**、中间格无缝、中间格被正确拉伸 |
 | `target.test.js` | 多元素 target 切图 | contentBox 与 targetBox 一致、切片是目标元素颜色、拼接逐像素一致 |
+| `textures.test.js` | 程序化贴图 | 光晕/血条底透明背景、尺寸对、九宫格拼接一致 |
+| `pack.test.js` | 图集打包 | **从 atlas 按坐标裁回与源图逐像素一致（打包无损）**、trim 自洽、plist 可解析 |
+| `custom-borders.test.js` | 自定义边框三档来源 | L0 手动值被采用且标记 manual、L1 钩子值被采用、无钩子/钩子抛错回退自动检测 |
+| `export.test.js` | 多资产编排导出 | yaml assets 解析（含行内注释剥离）、manifest 汇总、九宫格+整图产物齐全 |
+| `video.test.js` | 透明 WebM | 可解码、含内容、背景透明（角落 alpha 低）、动画帧有差异 |
+| `golden.test.js` | 视觉回归 diff 逻辑 | sameParams 参数一致性、帧清单差异（缺失/新增）、**像素 diff 单像素检测 + 差异框**、tolerance 容差、尺寸不一致标记 |
 
 ## 最强正确性断言
 

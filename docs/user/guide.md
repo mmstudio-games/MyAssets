@@ -64,6 +64,10 @@ myassets render scenes/bar-track && myassets slice scenes/bar-track   # 血条�
 | `myassets render <scene>` | 确定性逐帧渲染 → PNG 序列帧 |
 | `myassets slice <scene>` | 九宫格自动切图 → 9 切片 + 边框参数 |
 | `myassets import <scene>` | 生成引擎可导入目录 |
+| `myassets pack <场景\|PNG>...` | 图集打包 → 精灵图 / 图集 + 坐标 JSON + Cocos `.plist` |
+| `myassets video <scene>` | 动画 → 透明 WebM（VP9 + alpha） |
+| `myassets export <scene>` | 多资产编排 → 整套资产 + manifest.json |
+| `myassets golden <scene>` | 视觉回归 → 渲染与基线逐像素对比（`--update` 刷新基线） |
 
 运行 `myassets`（无参数）查看全部选项。
 
@@ -213,7 +217,7 @@ myassets video scenes/button --width 540 --height 960     # 自定义宽高（�
 
 - **透明背景**：VP9 alpha 通道保留（Chromium `CanvasCaptureStreamTransparent` flag）
 - **宽高/帧率/时长均可设**：CLI 参数 > scene.yaml > 默认
-- **fps 自动降级**：headless 渲染下截图有速率上限（约 10-26fps，视场景复杂度）。请求 fps 超过上限时自动按实际可达值采样，**时长保持正确**，并提示实际帧率
+- **fps 自动降级**：headless 渲染下截图有速率上限（约 10-25fps，视场景复杂度）。请求 fps 超过上限时自动按实际可达值采样，**时长保持正确**，并提示实际帧率
 - **帧内容确定性**：与 render 同时间轴/同截图通道；视频编码为 VBR 字节级不确定（行业常态）
 - 引擎用 VideoPlayer 播放即可，无需序列帧组件
 
@@ -236,6 +240,22 @@ assets:
 myassets render scenes/main-menu
 myassets export scenes/main-menu   # → build/main-menu/export/（每资产一个目录 + manifest.json）
 ```
+
+## 视觉回归（golden-image diff）
+
+渲染管线是确定性的（同输入必同输出）。golden-image diff 把"没动过的场景输出永远不变"变成自动检查：
+
+```bash
+myassets golden scenes/button           # check：渲染并与基线逐像素对比
+myassets golden scenes/button --update  # 有意变更后：刷新基线
+```
+
+- **基线**：`build/golden/<场景>/`（帧 + manifest.json 参数快照），本地缓存、gitignore 不入库——帧是确定性渲染的派生产物，场景 HTML + 内核不变即可随时 `--update` 原样重建
+- **严格一致**：默认 `tolerance=0` 逐像素严格相等（版本锁定内核 + 确定性纪律保证）；用非默认内核调试时可 `--tolerance 1` 容忍抗锯齿抖动
+- **差异报告**：逐帧输出差异像素数 / 差异率 / 差异区域；差异叠加图（差异标红）写到 `build/golden-diff/<场景>/diff-*.png`
+- **参数护栏**：scene.yaml 参数变化后 check 会报错提示先 `--update`（参数不同无法直接对比）
+- **CI 友好**：check 有差异时退出码 1，可挂到交付前自检
+- **范围**：只对 render 帧做基线。video 不做（VBR 编码字节级不确定）；切片/图集等派生资产由帧推导，锁帧即锁全部
 
 ## 引擎帧装配器（engine-libs/）
 

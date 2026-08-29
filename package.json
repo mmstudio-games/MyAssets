@@ -1,6 +1,6 @@
 {
   "name": "myassets",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "你和 AI 聊天产出的 HTML 页面，都可以在这里工程化变成游戏的位图资产 —— 确定性渲染成序列帧/九宫格切图/引擎导入",
   "type": "module",
   "main": "src/index.js",
